@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "com.japicraft"
-version = "1.0"
+version = "INDEV"
 
 repositories {
     mavenCentral()

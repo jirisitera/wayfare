@@ -1,72 +1,74 @@
 package com.japicraft;
 
+import com.japicraft.avatar.MovementManager;
+import com.japicraft.camera.CursorManager;
+import com.japicraft.command.InstanceCommand;
+import com.japicraft.player.ConfigurationManager;
+import com.japicraft.player.DisconnectManager;
+import com.japicraft.player.PreLoginManager;
+import com.japicraft.player.SpawnManager;
+import com.japicraft.server.InstanceRegistry;
+import com.japicraft.server.ServerListManager;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Player;
-import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerPacketEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.LightingChunk;
-import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.client.play.ClientInputPacket;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 
+import java.util.Scanner;
+
 public class Wayfare {
-    private static final ComponentLogger LOGGER = ComponentLogger.logger(Wayfare.class);
+    public static final String NAMESPACE = "wayfare";
+    public static final String DISPLAY_NAME = "Wayfare";
+    public static final int MAX_PLAYERS = 100;
+    public static final ComponentLogger LOGGER = ComponentLogger.logger(Wayfare.class);
+    private static final String HOST = "0.0.0.0";
+    private static final int PORT = 25565;
+    public static RegistryKey<DimensionType> DIMENSION;
 
     void main() {
-        Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly, "Minestom-Shutdown-Hook"));
-
+        setupEnvironment();
         MinecraftServer server = MinecraftServer.init(new Auth.Online());
-        MinecraftServer.setBrandName("Wayfare");
+        setupProperties();
 
-        RegistryKey<DimensionType> baseDimension = MinecraftServer.getDimensionTypeRegistry()
-            .register("wayfare:welcome", DimensionType.builder().build());
+        InstanceRegistry instanceRegistry = new InstanceRegistry();
 
-        InstanceContainer instance = MinecraftServer.getInstanceManager().createInstanceContainer(baseDimension);
+        ConfigurationManager.register(instanceRegistry);
+        MovementManager.register();
+        CursorManager.register();
+        ServerListManager.register();
+        PreLoginManager.register();
 
-        instance.setChunkSupplier(LightingChunk::new);
-        instance.setGenerator(unit -> unit.modifier().fillHeight(0, 90, Block.GRASS_BLOCK));
+        new SpawnManager(instanceRegistry);
+        new DisconnectManager(instanceRegistry);
+        LOGGER.atInfo().log(Component.text("All managers loaded!"));
 
-        Pos spawn = new Pos(0, 100, 0, 0, 90);
+        MinecraftServer.getCommandManager().register(new InstanceCommand());
+        LOGGER.atInfo().log(Component.text("All commands loaded!"));
 
-        Entity camera = new Entity(EntityType.ITEM_DISPLAY);
-        camera.setNoGravity(true);
-        camera.setInstance(instance, spawn);
+        server.start(HOST, PORT);
+        setupConsole();
+    }
 
-        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            Player player = event.getPlayer();
-            event.setSpawningInstance(instance);
-            player.setRespawnPoint(spawn);
-        });
+    private void setupEnvironment() {
+        Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly, "Minestom-Shutdown-Hook"));
+    }
 
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerSpawnEvent.class, event -> {
-            Player player = event.getPlayer();
-            player.setGameMode(GameMode.SPECTATOR);
+    private void setupProperties() {
+        DIMENSION = MinecraftServer.getDimensionTypeRegistry().register(Wayfare.NAMESPACE + ":private_instance", DimensionType.builder().build());
+        MinecraftServer.setBrandName(Wayfare.DISPLAY_NAME);
+    }
 
-            player.spectate(camera);
-            player.sendMessage(Component.text("Welcome!"));
-        });
-
-        MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketEvent.class, event -> {
-            if (event.getPacket() instanceof ClientInputPacket input) {
-                Player player = event.getPlayer();
-                if (input.forward()) {
-                    player.sendMessage(Component.text("Forward!"));
-                }
+    private void setupConsole() {
+        new Thread(() -> {
+            Scanner scanner = new Scanner(System.in);
+            while (scanner.hasNextLine()) {
+                String command = scanner.nextLine();
+                CommandManager manager = MinecraftServer.getCommandManager();
+                manager.execute(manager.getConsoleSender(), command);
             }
-        });
-
-        server.start("0.0.0.0", 25565);
-        LOGGER.atInfo().log(Component.text("Server loaded!").color(NamedTextColor.RED));
+        }, "Console-Reader").start();
     }
 }

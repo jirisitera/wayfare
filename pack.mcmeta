@@ -1,0 +1,25 @@
+{
+  "pack": {
+    "description": [
+      {
+        "color": "#66EEFF",
+        "text": "Wayfare Assets Pack\n"
+      },
+      {
+        "color": "#AAAAAA",
+        "text": "vPACK_VERSION"
+      },
+      {
+        "color": "#FFFFFF",
+        "text": " | "
+      },
+      {
+        "color": "#AAAAAA",
+        "text": "GIT_HASH"
+      }
+    ],
+    "pack_format": 88,
+    "min_format": 88,
+    "max_format": 88
+  }
+}
