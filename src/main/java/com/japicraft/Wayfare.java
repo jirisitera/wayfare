@@ -3,6 +3,7 @@ package com.japicraft;
 import com.japicraft.avatar.MovementManager;
 import com.japicraft.camera.CursorManager;
 import com.japicraft.command.InstanceCommand;
+import com.japicraft.command.StopCommand;
 import com.japicraft.player.ConfigurationManager;
 import com.japicraft.player.DisconnectManager;
 import com.japicraft.player.PreLoginManager;
@@ -45,7 +46,9 @@ public class Wayfare {
         new DisconnectManager(instanceRegistry);
         LOGGER.atInfo().log(Component.text("All managers loaded!"));
 
-        MinecraftServer.getCommandManager().register(new InstanceCommand());
+        CommandManager commandManager = MinecraftServer.getCommandManager();
+        commandManager.register(new InstanceCommand());
+        commandManager.register(new StopCommand());
         LOGGER.atInfo().log(Component.text("All commands loaded!"));
 
         server.start(HOST, PORT);
@@ -53,7 +56,7 @@ public class Wayfare {
     }
 
     private void setupEnvironment() {
-        Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly, "Minestom-Shutdown-Hook"));
+        Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly));
     }
 
     private void setupProperties() {
