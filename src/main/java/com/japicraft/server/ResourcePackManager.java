@@ -19,6 +19,21 @@ import java.util.Base64;
 import java.util.UUID;
 
 public class ResourcePackManager {
+    private static String calculateHash(URI uri) {
+        try (HttpClient client = HttpClient.newHttpClient()) {
+            // download file
+            HttpResponse<byte[]> response = client.send(HttpRequest.newBuilder().uri(uri).GET().build(), HttpResponse.BodyHandlers.ofByteArray());
+            // calculate SHA1 hash
+            return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest(response.body()));
+        } catch (InterruptedException | IOException | NoSuchAlgorithmException e) {
+            return null;
+        }
+    }
+
+    private static UUID generateUniqueId(String hash) {
+        return UUID.nameUUIDFromBytes(hash.getBytes(StandardCharsets.UTF_8));
+    }
+
     public void register() {
         // prepare resource pack
         URI packURI = URI.create(Wayfare.getConfig().resourcePackSource());
@@ -33,19 +48,5 @@ public class ResourcePackManager {
             .build();
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> event.getPlayer().sendResourcePacks(request));
         Wayfare.LOGGER.atInfo().log(Component.text("Resource pack loaded!"));
-    }
-
-    private static String calculateHash(URI uri) {
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            // download file
-            HttpResponse<byte[]> response = client.send(HttpRequest.newBuilder().uri(uri).GET().build(), HttpResponse.BodyHandlers.ofByteArray());
-            // calculate SHA1 hash
-            return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-1").digest(response.body()));
-        } catch (InterruptedException | IOException | NoSuchAlgorithmException e) {
-            return null;
-        }
-    }
-    private static UUID generateUniqueId(String hash) {
-        return UUID.nameUUIDFromBytes(hash.getBytes(StandardCharsets.UTF_8));
     }
 }
