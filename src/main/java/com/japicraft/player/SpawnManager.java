@@ -2,6 +2,7 @@ package com.japicraft.player;
 
 import com.japicraft.avatar.AvatarManager;
 import com.japicraft.camera.CameraManager;
+import com.japicraft.camera.CursorManager;
 import com.japicraft.server.InstanceManager;
 import com.japicraft.server.InstanceRegistry;
 import net.kyori.adventure.text.Component;
@@ -28,6 +29,7 @@ public class SpawnManager {
             player.setInvisible(true);
             player.setGameMode(GameMode.ADVENTURE);
             new PingManager().schedule(player);
+            CursorManager.update(player, 0, 0);
             // create new instance for player
             InstanceManager instance = instanceRegistry.getOrCreate(player.getUuid());
             CameraManager cameraManager = instance.getCameraManager();

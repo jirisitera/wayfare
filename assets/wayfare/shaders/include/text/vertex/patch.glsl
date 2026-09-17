@@ -1,6 +1,6 @@
 #ifdef IS_GUI
 // render cursor
-int corner = gl_VertexID % 4;
+int corner = gl_VertexIndex % 4;
 renderCursor = texelFetch(Sampler0, ivec2(0, 0), 0).rgb == vec3(234.0, 123.0, 213.0) / 255.0 ? 1.0 : 0.0;
 if (renderCursor > 0.5) {
     // calculate position offset
@@ -33,7 +33,10 @@ if (renderCursor > 0.5) {
     float x = mix(-1.0, 1.0, (red * 16.0 + floor(blue / 16.0)) / 4095.0);
     float y = mix(1.0, -1.0, (green * 16.0 + mod(blue, 16.0)) / 4095.0);
     // apply offsets
-    gl_Position = vec4(x + offset.x, y + offset.y, gl_Position.z, 1.0);
+    gl_Position.xy = vec2(x + offset.x, y + offset.y);
     cursorUV = (cornerPixel + pixelOffset) / textureSize;
+    // apply to original pixel
+    texCoord0 = cursorUV;
+    vertexColor = vec4(1.0);
 }
 #endif

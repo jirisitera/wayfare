@@ -1,4 +1,4 @@
 #ifdef IS_GUI
-in float renderCursor;
-in vec2 cursorUV;
+layout(location = 4) in float renderCursor;
+layout(location = 5) in vec2 cursorUV;
 #endif

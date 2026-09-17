@@ -1,48 +1,66 @@
 #version 330
+#extension GL_ARB_separate_shader_objects : require
 
 #if !defined(IS_GUI) && !defined(IS_SEE_THROUGH)
-#moj_import <minecraft:fog.glsl>
+#include <minecraft:fog.glsl>
 #endif
 
-#moj_import <minecraft:dynamictransforms.glsl>
-
-#if !defined(IS_GUI) && !defined(IS_SEE_THROUGH)
-in float sphericalVertexDistance;
-in float cylindricalVertexDistance;
-#endif
-
-in vec4 vertexColor;
-in vec2 texCoord0;
+#include <minecraft:dynamictransforms.glsl>
+#include <minecraft:oit.glsl>
 
 uniform sampler2D Sampler0;
 
-out vec4 fragColor;
+#if !defined(IS_GUI) && !defined(IS_SEE_THROUGH)
+layout(location = 0) in float sphericalVertexDistance;
+layout(location = 1) in float cylindricalVertexDistance;
+#endif
 
-#moj_import <wayfare:text/fragment/import.glsl>
+layout(location = 2) in vec4 vertexColor;
+layout(location = 3) in vec2 texCoord0;
+
+#ifndef OIT_ALPHA_ONLY
+layout(location = 0) out vec4 fragColor;
+#endif
+
+vec4 calculateFinalColor(vec4 color) {
+    #ifdef OIT_ACCUMULATE
+    color = sampleColorForAccumulation(color);
+    #endif
+
+    #if !defined(IS_SEE_THROUGH) && !defined(IS_GUI)
+
+    #ifdef OIT_ACCUMULATE
+    vec4 fogColor = vec4(FogColor.rgb * color.a, FogColor.a);
+    #else
+    vec4 fogColor = FogColor;
+    #endif
+
+    color = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, fogColor);
+    #endif
+
+    return color;
+}
+
+#include <wayfare:text/fragment/import.glsl>
 
 void main() {
-#ifdef IS_GRAYSCALE
+    #ifdef IS_GRAYSCALE
     vec4 texColor = texture(Sampler0, texCoord0).rrrr;
-#else
+    #else
     vec4 texColor = texture(Sampler0, texCoord0);
-#endif
+    #endif
 
-#ifdef IS_SEE_THROUGH
-    vec4 color = texColor * vertexColor;
-#else
     vec4 color = texColor * vertexColor * ColorModulator;
-#endif
 
-#ifndef IS_GUI
     if (color.a < 0.1) {
         discard;
     }
-#endif
 
-#ifdef IS_SEE_THROUGH
-    fragColor = color * ColorModulator;
-#moj_import <wayfare:text/fragment/patch.glsl>
-#else
-    fragColor = apply_fog(color, sphericalVertexDistance, cylindricalVertexDistance, FogEnvironmentalStart, FogEnvironmentalEnd, FogRenderDistanceStart, FogRenderDistanceEnd, FogColor);
-#endif
+    #ifdef OIT_ALPHA_ONLY
+    executeAlphaOnlyPhase(gl_FragCoord.z, color.a);
+    #else
+    fragColor = calculateFinalColor(color);
+    #endif
+
+    #include <wayfare:text/fragment/patch.glsl>
 }

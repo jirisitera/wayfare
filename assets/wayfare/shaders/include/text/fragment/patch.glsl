@@ -1,10 +1,9 @@
-#elif defined(IS_GUI)
+#ifdef IS_GUI
 if (renderCursor > 0.5) {
-    vec4 cursorTexture = texture(Sampler0, cursorUV);
-    if (cursorTexture.a < 0.1) {
+    vec4 cursorColor = texture(Sampler0, cursorUV);
+    if (cursorColor.a < 0.1) {
         discard;
     }
-    fragColor = cursorTexture;
-} else {
-    fragColor = color * ColorModulator;
+    fragColor = cursorColor;
 }
+#endif

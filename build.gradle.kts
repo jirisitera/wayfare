@@ -7,12 +7,13 @@ group = "com.japicraft"
 version = "INDEV"
 
 repositories {
+    maven(url = "https://central.sonatype.com/repository/maven-snapshots/")
     mavenCentral()
 }
 
 dependencies {
     // core
-    implementation("net.minestom:minestom:2026.09.12-26.2")
+    implementation("net.minestom:minestom:26_3-SNAPSHOT")
     // logging
     implementation("org.slf4j:slf4j-simple:2.0.19")
     // configs
