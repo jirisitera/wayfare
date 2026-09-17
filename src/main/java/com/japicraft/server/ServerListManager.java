@@ -17,23 +17,7 @@ import java.util.List;
 public class ServerListManager {
     private static final byte[] FAVICON = ServerListManager.loadIcon();
     private static final Component DESCRIPTION = Component.text("Wayfare Test Server").color(TextColor.color(102, 238, 255));
-    private static final Status.VersionInfo VERSION_INFO = new Status.VersionInfo(Wayfare.DISPLAY_NAME, MinecraftServer.PROTOCOL_VERSION);
-
-    public static void register() {
-        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> event.setStatus(Status.builder()
-            .playerInfo(Status.PlayerInfo.builder()
-                .maxPlayers(Wayfare.MAX_PLAYERS)
-                .onlinePlayers(MinecraftServer.getConnectionManager().getOnlinePlayerCount())
-                .sample(ServerListManager.getSample())
-                .build()
-            )
-            .favicon(ServerListManager.FAVICON)
-            .description(ServerListManager.DESCRIPTION)
-            .versionInfo(ServerListManager.VERSION_INFO)
-            .enforcesSecureChat(true)
-            .build()
-        ));
-    }
+    private static final Status.VersionInfo VERSION_INFO = new Status.VersionInfo(Wayfare.getConfig().displayName(), MinecraftServer.PROTOCOL_VERSION);
 
     private static Component getSample() {
         List<Component> heads = new ArrayList<>();
@@ -52,5 +36,21 @@ public class ServerListManager {
         } catch (IOException e) {
             return null;
         }
+    }
+
+    public void register() {
+        MinecraftServer.getGlobalEventHandler().addListener(ServerListPingEvent.class, event -> event.setStatus(Status.builder()
+            .playerInfo(Status.PlayerInfo.builder()
+                .maxPlayers(Wayfare.getConfig().maxPlayers())
+                .onlinePlayers(MinecraftServer.getConnectionManager().getOnlinePlayerCount())
+                .sample(ServerListManager.getSample())
+                .build()
+            )
+            .favicon(ServerListManager.FAVICON)
+            .description(ServerListManager.DESCRIPTION)
+            .versionInfo(ServerListManager.VERSION_INFO)
+            .enforcesSecureChat(true)
+            .build()
+        ));
     }
 }

@@ -23,7 +23,19 @@ public class CursorManager {
     private static final Component SPRITE = Component.text(CursorManager.ICON).shadowColor(ShadowColor.none()).font(CursorManager.FONT);
     private static final Title.Times TIMES = Title.Times.times(Duration.ZERO, Duration.ofSeconds(5), Duration.ZERO);
 
-    public static void register() {
+    private static TextColor getCursorColor(float yaw, float pitch) {
+        Coordinates coordinates = Coordinates.fromRotation(yaw, pitch);
+        int x = (int) (coordinates.x() * 4095.0);
+        int y = (int) (coordinates.y() * 4095.0);
+        return TextColor.color(x / 16, y / 16, x % 16 * 16 + y % 16);
+    }
+
+    public static Coordinates getCursorScreenPixel(float yaw, float pitch) {
+        Coordinates coordinates = Coordinates.fromRotation(yaw, pitch);
+        return new Coordinates(coordinates.x() * 1920.0, coordinates.y() * 1080.0);
+    }
+
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketEvent.class, event -> {
             switch (event.getPacket()) {
                 case ClientPlayerRotationPacket rotation ->
@@ -59,17 +71,5 @@ public class CursorManager {
                 default -> event.getPlayer().sendMessage(event.getPacket().toString());
             }
         });
-    }
-
-    private static TextColor getCursorColor(float yaw, float pitch) {
-        Coordinates coordinates = Coordinates.fromRotation(yaw, pitch);
-        int x = (int) (coordinates.x() * 4095.0);
-        int y = (int) (coordinates.y() * 4095.0);
-        return TextColor.color(x / 16, y / 16, x % 16 * 16 + y % 16);
-    }
-
-    public static Coordinates getCursorScreenPixel(float yaw, float pitch) {
-        Coordinates coordinates = Coordinates.fromRotation(yaw, pitch);
-        return new Coordinates(coordinates.x() * 1920.0, coordinates.y() * 1080.0);
     }
 }

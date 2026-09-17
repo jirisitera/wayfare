@@ -7,9 +7,9 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
 
 public class PreLoginManager {
-    public static void register() {
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerPreLoginEvent.class, event -> {
-            if (MinecraftServer.getConnectionManager().getOnlinePlayerCount() >= Wayfare.MAX_PLAYERS) {
+            if (MinecraftServer.getConnectionManager().getOnlinePlayerCount() >= Wayfare.getConfig().maxPlayers()) {
                 event.getConnection().kick(Component.text("The server is currently full!", NamedTextColor.RED));
             }
         });

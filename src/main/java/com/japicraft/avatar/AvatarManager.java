@@ -3,7 +3,10 @@ package com.japicraft.avatar;
 import com.japicraft.server.InstanceManager;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.entity.metadata.avatar.MannequinMeta;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.network.player.ResolvableProfile;
@@ -14,7 +17,7 @@ public class AvatarManager {
     public static final double SNEAK_SPEED = 3.5;
     public static final double MOVE_SPEED = 5.0;
     public static final double SPRINT_SPEED = 7.5;
-    private final EntityCreature avatar = new EntityCreature(EntityType.MANNEQUIN);
+    private final Entity avatar = new Entity(EntityType.MANNEQUIN);
     private boolean lastSneaking;
     private boolean lastSprinting;
 
@@ -50,12 +53,10 @@ public class AvatarManager {
                 avatar.setVelocity(sprinting ? direction.mul(SPRINT_SPEED) : sneaking ? direction.mul(SNEAK_SPEED) : direction.mul(MOVE_SPEED));
             }
             if (sneaking != lastSneaking) {
-                player.sendMessage("Changed sneak.");
                 avatar.setSneaking(sneaking);
                 lastSneaking = sneaking;
             }
             if (sprinting != lastSprinting) {
-                player.sendMessage("Changed sprint.");
                 avatar.setSprinting(sprinting);
                 lastSprinting = sprinting;
             }

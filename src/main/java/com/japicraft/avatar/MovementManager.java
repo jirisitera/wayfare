@@ -11,8 +11,9 @@ public class MovementManager {
     public static final Tag<Integer> INPUT_Z = Tag.Integer("inputZ").defaultValue(0);
     public static final Tag<Boolean> INPUT_SNEAK = Tag.Boolean("inputSneak").defaultValue(false);
     public static final Tag<Boolean> INPUT_SPRINT = Tag.Boolean("inputSprint").defaultValue(false);
+    public static final Tag<Boolean> INPUT_JUMP = Tag.Boolean("inputJump").defaultValue(false);
 
-    public static void register() {
+    public void register() {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerPacketEvent.class, event -> {
             if (event.getPacket() instanceof ClientInputPacket input) {
                 Player player = event.getPlayer();
@@ -20,6 +21,7 @@ public class MovementManager {
                 player.setTag(INPUT_Z, (input.forward() ? 1 : 0) - (input.backward() ? 1 : 0));
                 player.setTag(INPUT_SNEAK, input.shift());
                 player.setTag(INPUT_SPRINT, input.sprint());
+                player.setTag(INPUT_JUMP, input.jump());
             }
         });
     }

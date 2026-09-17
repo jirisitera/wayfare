@@ -15,6 +15,10 @@ dependencies {
     implementation("net.minestom:minestom:2026.09.12-26.2")
     // logging
     implementation("org.slf4j:slf4j-simple:2.0.19")
+    // configs
+    implementation("org.tomlj:tomlj:1.3.0")
+    // type checking
+    compileOnly("org.checkerframework:checker-qual:4.2.3")
 }
 
 java {

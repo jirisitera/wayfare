@@ -6,7 +6,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 
 public class DisconnectManager {
-    public DisconnectManager(InstanceRegistry instanceRegistry) {
+    public void register(InstanceRegistry instanceRegistry) {
         MinecraftServer.getGlobalEventHandler().addListener(PlayerDisconnectEvent.class, event -> {
             Player player = event.getPlayer();
             instanceRegistry.remove(player.getUuid());
