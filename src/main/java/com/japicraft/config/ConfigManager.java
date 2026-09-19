@@ -51,9 +51,6 @@ public class ConfigManager {
     }
 
     public static Config getInstance() {
-        if (ConfigManager.INSTANCE == null) {
-            ConfigManager.reload();
-        }
         return ConfigManager.INSTANCE;
     }
 }

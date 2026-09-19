@@ -31,14 +31,15 @@ public class Wayfare {
     void main() {
         setupEnvironment();
         MinecraftServer server = MinecraftServer.init(new Auth.Online());
+        ConfigManager.reload();
         setupProperties();
 
         InstanceRegistry instanceRegistry = new InstanceRegistry();
 
         new SpawnManager().register(instanceRegistry);
         new DisconnectManager().register(instanceRegistry);
+        new MovementManager().register(instanceRegistry);
 
-        new MovementManager().register();
         new CursorManager().register();
         new ServerListManager().register();
         new PreLoginManager().register();

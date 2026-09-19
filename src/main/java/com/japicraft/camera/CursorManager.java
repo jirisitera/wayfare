@@ -84,11 +84,9 @@ public class CursorManager {
                     }
                 }
                 case ClientInteractEntityPacket interact -> {
-                    if (!interact.hand().equals(PlayerHand.MAIN)) {
-                        return;
+                    if (interact.hand() == PlayerHand.MAIN) {
+                        event.getPlayer().sendMessage("Right clicked!");
                     }
-                    Player player = event.getPlayer();
-                    player.sendMessage("Right clicked!");
                 }
                 case ClientPickItemFromEntityPacket _ -> {
                     Player player = event.getPlayer();
