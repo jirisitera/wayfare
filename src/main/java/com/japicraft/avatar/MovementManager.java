@@ -16,7 +16,7 @@ public class MovementManager {
                 int x = (input.left() ? 1 : 0) - (input.right() ? 1 : 0);
                 int z = (input.forward() ? 1 : 0) - (input.backward() ? 1 : 0);
                 boolean sneak = input.shift();
-                boolean sprint = input.sprint() && !sneak;
+                boolean sprint = (input.sprint() || input.jump()) && !sneak;
 
                 AvatarManager avatarManager = registry.getOrCreate(event.getPlayer().getUuid()).getAvatarManager();
                 avatarManager.update(x, z, sneak, sprint);

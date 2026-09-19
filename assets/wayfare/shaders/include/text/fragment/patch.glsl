@@ -4,6 +4,6 @@ if (renderCursor > 0.5) {
     if (cursorColor.a < 0.1) {
         discard;
     }
-    fragColor = cursorColor;
+    fragColor = cursorColor * vertexColor;
 }
 #endif

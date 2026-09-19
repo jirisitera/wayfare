@@ -12,10 +12,10 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.network.player.ResolvableProfile;
 
 public class AvatarManager {
-    public static final Pos SPAWN = new Pos(0.0, InstanceManager.MAX_HEIGHT + 1.0, 0.0, 0.0F, 0.0F);
-    public static final double SNEAK_SPEED = 3.5;
-    public static final double MOVE_SPEED = 5.0;
-    public static final double SPRINT_SPEED = 7.5;
+    public static final Pos SPAWN = new Pos(0.0, InstanceManager.MAX_HEIGHT + 0.5, 0.0, 0.0F, 0.0F);
+    public static final double SNEAK_SPEED = 5.0;
+    public static final double MOVE_SPEED = 7.5;
+    public static final double SPRINT_SPEED = 10.0;
     private final Entity avatar = new Entity(EntityType.MANNEQUIN);
     private boolean lastSneaking;
     private boolean lastSprinting;
@@ -23,10 +23,6 @@ public class AvatarManager {
 
     public AvatarManager(InstanceContainer instance) {
         avatar.setInstance(instance, AvatarManager.SPAWN);
-    }
-
-    public Entity getAvatar() {
-        return avatar;
     }
 
     public long nextTask() {
@@ -59,5 +55,9 @@ public class AvatarManager {
             avatar.setSprinting(sprinting);
             lastSprinting = sprinting;
         }
+    }
+
+    public void addPassenger(Entity entity) {
+        avatar.addPassenger(entity);
     }
 }

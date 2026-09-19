@@ -1,7 +1,6 @@
 package com.japicraft.camera;
 
 import com.japicraft.Wayfare;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -18,10 +17,8 @@ import net.minestom.server.tag.Tag;
 import java.time.Duration;
 
 public class CursorManager {
-    private static final String ICON = "🖱";
-    private static final Key FONT = Key.key(Wayfare.NAMESPACE, "cursor");
-    private static final Component SPRITE = Component.text(CursorManager.ICON).shadowColor(ShadowColor.none()).font(CursorManager.FONT);
-    private static final Title.Times TIMES = Title.Times.times(Duration.ZERO, Duration.ofSeconds(5), Duration.ZERO);
+    private static final Component SPRITE = Component.text("🖱").shadowColor(ShadowColor.none()).font(Wayfare.FONT);
+    private static final Title.Times TIMES = Title.Times.times(Duration.ZERO, Duration.ofSeconds(4), Duration.ofSeconds(1));
     private static final Tag<Float> INPUT_YAW = Tag.Float("inputYaw").defaultValue(0.0F);
     private static final Tag<Float> INPUT_PITCH = Tag.Float("inputPitch").defaultValue(0.0F);
 
@@ -37,21 +34,21 @@ public class CursorManager {
     }
 
     private static boolean isBottomSide(Coordinates coordinates) {
-        return coordinates.y() >= 0.5;
+        return coordinates.y() > 0.5;
     }
 
     private static boolean isLeftSide(Coordinates coordinates) {
-        return coordinates.x() <= 0.5;
+        return coordinates.x() < 0.5;
     }
 
     private static boolean isRightSide(Coordinates coordinates) {
-        return coordinates.x() >= 0.5;
+        return coordinates.x() > 0.5;
     }
 
     public static void update(Player player, float yaw, float pitch) {
         player.setTag(CursorManager.INPUT_YAW, yaw);
         player.setTag(CursorManager.INPUT_PITCH, pitch);
-        player.showTitle(Title.title(CursorManager.SPRITE.color(CursorManager.getColor(yaw, pitch)), Component.empty(), CursorManager.TIMES));
+        player.showTitle(Title.title(Component.text(""), CursorManager.SPRITE.color(CursorManager.getColor(yaw, pitch)), CursorManager.TIMES));
     }
 
     public void register() {

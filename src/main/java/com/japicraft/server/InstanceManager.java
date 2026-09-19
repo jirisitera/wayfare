@@ -10,7 +10,8 @@ import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 
 public class InstanceManager {
-    public static final int MAX_HEIGHT = 90;
+    public static final int MIN_HEIGHT = 0;
+    public static final int MAX_HEIGHT = 10;
     private final InstanceContainer instance;
     private final AvatarManager avatarManager;
     private final CameraManager cameraManager;
@@ -18,7 +19,7 @@ public class InstanceManager {
     public InstanceManager(RegistryKey<DimensionType> dimensionType) {
         instance = MinecraftServer.getInstanceManager().createInstanceContainer(dimensionType);
         instance.setChunkSupplier(LightingChunk::new);
-        instance.setGenerator(unit -> unit.modifier().fillHeight(0, MAX_HEIGHT, Block.GRASS_BLOCK));
+        instance.setGenerator(unit -> unit.modifier().fillHeight(InstanceManager.MIN_HEIGHT, InstanceManager.MAX_HEIGHT, Block.GRASS_BLOCK));
         avatarManager = new AvatarManager(instance);
         cameraManager = new CameraManager(instance);
     }

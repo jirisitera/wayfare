@@ -1,0 +1,25 @@
+{
+  "providers": [
+    {
+      "type": "bitmap",
+      "ascent": 128,
+      "height": 256,
+      "file": "wayfare:gui/cursor.png",
+      "chars": ["🖱"]
+    },
+    {
+      "type": "bitmap",
+      "ascent": 128,
+      "height": 256,
+      "file": "wayfare:gui/black.png",
+      "chars": ["■"]
+    },
+    {
+      "type": "bitmap",
+      "ascent": 128,
+      "height": 256,
+      "file": "wayfare:gui/title.png",
+      "chars": ["□"]
+    }
+  ]
+}

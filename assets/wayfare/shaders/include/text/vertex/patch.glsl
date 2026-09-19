@@ -37,6 +37,6 @@ if (renderCursor > 0.5) {
     cursorUV = (cornerPixel + pixelOffset) / textureSize;
     // apply to original pixel
     texCoord0 = cursorUV;
-    vertexColor = vec4(1.0);
+    vertexColor = vec4(1.0, 1.0, 1.0, Color.a);
 }
 #endif

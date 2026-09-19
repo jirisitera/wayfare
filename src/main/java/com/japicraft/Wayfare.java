@@ -10,8 +10,8 @@ import com.japicraft.player.DisconnectManager;
 import com.japicraft.player.PreLoginManager;
 import com.japicraft.player.SpawnManager;
 import com.japicraft.server.InstanceRegistry;
-import com.japicraft.server.ResourcePackManager;
 import com.japicraft.server.ServerListManager;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.minestom.server.Auth;
@@ -22,6 +22,7 @@ import java.util.Scanner;
 
 public class Wayfare {
     public static final String NAMESPACE = "wayfare";
+    public static final Key FONT = Key.key(Wayfare.NAMESPACE, "default");
     public static final ComponentLogger LOGGER = ComponentLogger.logger(Wayfare.class);
 
     public static Config getConfig() {
@@ -43,7 +44,7 @@ public class Wayfare {
         new CursorManager().register();
         new ServerListManager().register();
         new PreLoginManager().register();
-        new ResourcePackManager().register();
+        //new ResourcePackManager().register();
 
         LOGGER.atInfo().log(Component.text("All managers loaded!"));
 

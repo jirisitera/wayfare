@@ -14,7 +14,10 @@ public class InstanceRegistry {
     public RegistryKey<DimensionType> dimensionType;
 
     public InstanceRegistry() {
-        dimensionType = MinecraftServer.getDimensionTypeRegistry().register(Wayfare.NAMESPACE + ":private_instance", DimensionType.builder().build());
+        dimensionType = MinecraftServer.getDimensionTypeRegistry().register(Wayfare.NAMESPACE + ":private_instance", DimensionType.builder()
+            .skybox(DimensionType.Skybox.NONE)
+            .build()
+        );
     }
 
     public InstanceManager getOrCreate(UUID uuid) {
