@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class InstanceRegistry {
+    public final RegistryKey<DimensionType> dimensionType;
     private final Map<UUID, InstanceManager> instances = new HashMap<>();
-    public RegistryKey<DimensionType> dimensionType;
 
     public InstanceRegistry() {
         dimensionType = MinecraftServer.getDimensionTypeRegistry().register(Wayfare.NAMESPACE + ":private_instance", DimensionType.builder()

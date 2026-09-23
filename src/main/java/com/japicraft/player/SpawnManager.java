@@ -1,6 +1,7 @@
 package com.japicraft.player;
 
 import com.japicraft.avatar.AvatarManager;
+import com.japicraft.avatar.BulletManager;
 import com.japicraft.camera.CameraManager;
 import com.japicraft.camera.CursorManager;
 import com.japicraft.game.MenuManager;
@@ -30,14 +31,16 @@ public class SpawnManager {
             player.setGameMode(GameMode.ADVENTURE);
             new PingManager().schedule(player);
             // create new instance for player
-            InstanceManager instance = instanceRegistry.getOrCreate(player.getUuid());
-            CameraManager cameraManager = instance.getCameraManager();
-            AvatarManager avatarManager = instance.getAvatarManager();
+            InstanceManager instanceManager = instanceRegistry.getOrCreate(player.getUuid());
+            CameraManager cameraManager = instanceManager.getCameraManager();
+            AvatarManager avatarManager = instanceManager.getAvatarManager();
             // setup camera
             cameraManager.addPassenger(player);
             // setup avatar
             avatarManager.addPassenger(cameraManager.getBounds());
             avatarManager.setSkin(player);
+            // setup environment
+            BulletManager.scheduleSpawning(player);
             // show tutorial
             MenuManager.openMain(player);
             CursorManager.update(player, 0.0F, 0.0F);
