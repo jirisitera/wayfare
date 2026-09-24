@@ -12,6 +12,7 @@ import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 
@@ -19,6 +20,7 @@ import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BulletManager {
+    public static final Tag<String> OWNER_NAME = Tag.String("ownerName");
     private static final double HEIGHT = InstanceManager.MAX_HEIGHT + 1.5;
     private static final double SPEED = 20.0;
     private static final double DRIFT = 1.5;
@@ -54,14 +56,15 @@ public class BulletManager {
 
         Vec velocity = new Vec(Math.cos(flightAngle) * speed, 0, Math.sin(flightAngle) * speed);
 
-        BulletManager.spawn(target.getInstance(), target.getPosition().add(offsetX, 0, offsetZ), velocity);
+        BulletManager.spawn(target.getInstance(), "environment", target.getPosition().add(offsetX, 0, offsetZ), velocity);
     }
 
-    public static void spawn(Instance instance, Pos position, Vec velocity) {
+    public static void spawn(Instance instance, String ownerName, Pos position, Vec velocity) {
         Entity bullet = new Entity(EntityType.ITEM_DISPLAY);
         // set entity properties
         bullet.setNoGravity(true);
         bullet.setHasPhysics(false);
+        bullet.setTag(BulletManager.OWNER_NAME, ownerName);
         bullet.editEntityMeta(ItemDisplayMeta.class, meta -> {
             meta.setItemStack(ItemStack.of(Material.ECHO_SHARD).builder().itemModel(Wayfare.NAMESPACE + Wayfare.NAMESPACE_SEPARATOR + "bullet").build());
             meta.setTransformationInterpolationDuration(10);

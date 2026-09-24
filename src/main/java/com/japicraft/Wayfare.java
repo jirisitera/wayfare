@@ -33,7 +33,8 @@ public class Wayfare {
 
     void main() {
         setupEnvironment();
-        MinecraftServer server = MinecraftServer.init(new Auth.Online());
+        Auth auth = new Auth.Online();
+        MinecraftServer server = MinecraftServer.init(auth);
         ConfigManager.reload();
         setupProperties();
 
@@ -42,8 +43,8 @@ public class Wayfare {
         new SpawnManager().register(instanceRegistry);
         new DisconnectManager().register(instanceRegistry);
         new MovementManager().register(instanceRegistry);
-
         new CursorManager().register(instanceRegistry);
+
         new ServerListManager().register();
         new PreLoginManager().register();
         new ResourcePackManager().register();

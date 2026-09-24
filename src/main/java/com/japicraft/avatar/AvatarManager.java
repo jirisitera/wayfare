@@ -14,6 +14,8 @@ import net.minestom.server.network.player.ResolvableProfile;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 
+import java.util.Collection;
+
 public class AvatarManager {
     public static final Pos SPAWN = new Pos(0.0, InstanceManager.MAX_HEIGHT + 0.5, 0.0, 0.0F, 0.0F);
     public static final double SNEAK_SPEED = 5.0;
@@ -24,10 +26,15 @@ public class AvatarManager {
     private boolean lastSneaking;
     private boolean lastSprinting;
     private long lastTaskTime;
+    private Player owner;
 
     public AvatarManager(InstanceContainer instance) {
         this.instance = instance;
         avatar.setInstance(instance, AvatarManager.SPAWN);
+    }
+
+    public int getEntityId() {
+        return avatar.getEntityId();
     }
 
     public long nextTask() {
@@ -38,7 +45,8 @@ public class AvatarManager {
         return lastTaskTime == time;
     }
 
-    public void setSkin(Player player) {
+    public void setOwner(Player player) {
+        this.owner = player;
         PlayerSkin playerSkin = player.getSkin();
         if (playerSkin == null) {
             return;
@@ -52,10 +60,10 @@ public class AvatarManager {
         Pos position = avatar.getPosition();
         Scheduler scheduler = avatar.scheduler();
 
-        BulletManager.spawn(instance, position, BulletManager.calculateVelocity(coordinates, velocity, 1.0));
+        BulletManager.spawn(instance, owner.getUsername(), position, BulletManager.calculateVelocity(coordinates, velocity, 1.0));
 
         for (int i = 1; i < count; i++) {
-            scheduler.scheduleTask(() -> BulletManager.spawn(instance, position, BulletManager.calculateVelocity(coordinates, velocity, 1.0)), TaskSchedule.tick(i * 2), TaskSchedule.stop());
+            scheduler.scheduleTask(() -> BulletManager.spawn(instance, owner.getUsername(), position, BulletManager.calculateVelocity(coordinates, velocity, 1.0)), TaskSchedule.tick(i * 2), TaskSchedule.stop());
         }
     }
 
@@ -75,7 +83,15 @@ public class AvatarManager {
         }
     }
 
-    public void addPassenger(Entity entity) {
-        avatar.addPassenger(entity);
+    public void scheduleHitChecking() {
+        avatar.scheduler().scheduleTask(() -> {
+            Collection<Entity> entities = instance.getNearbyEntities(avatar.getPosition(), 1.0);
+            for (Entity entity : entities) {
+                String hitOwner = entity.getTag(BulletManager.OWNER_NAME);
+                if (hitOwner != null && !hitOwner.equals(owner.getUsername())) {
+                    owner.sendMessage("You got hit by: " + hitOwner + "!");
+                }
+            }
+        }, TaskSchedule.nextTick(), TaskSchedule.nextTick());
     }
 }
