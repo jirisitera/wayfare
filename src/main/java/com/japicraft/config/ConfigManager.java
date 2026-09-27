@@ -44,7 +44,7 @@ public class ConfigManager {
                 parsed.getString("resourcePackSource", () -> ConfigManager.RESOURCE_PACK_SOURCE),
                 parsed.getString("resourcePackPrompt", () -> ConfigManager.RESOURCE_PACK_PROMPT)
             );
-            Wayfare.LOGGER.atInfo().log("Loaded server config to memory.");
+            Wayfare.LOGGER.atInfo().log("Loaded server config.");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

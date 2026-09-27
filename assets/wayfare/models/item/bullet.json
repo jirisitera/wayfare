@@ -9,8 +9,9 @@
 	"elements": [
 		{
 			"name": "lava",
-			"from": [5, 1, 5],
-			"to": [11, 7, 11],
+			"from": [5, 9, 5],
+			"to": [11, 15, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 8, 0]},
 			"faces": {
 				"north": {"uv": [4, 8, 7, 11], "texture": "#0"},
 				"east": {"uv": [8, 4, 11, 7], "texture": "#0"},
@@ -22,8 +23,9 @@
 		},
 		{
 			"name": "magma",
-			"from": [4.99, 0.99, 4.99],
-			"to": [11.09, 7.09, 11.09],
+			"from": [4.99, 8.99, 4.99],
+			"to": [11.09, 15.09, 11.09],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 8, 0]},
 			"faces": {
 				"north": {"uv": [0, 0, 4, 4], "texture": "#0"},
 				"east": {"uv": [0, 4, 4, 8], "texture": "#0"},
@@ -35,8 +37,9 @@
 		},
 		{
 			"name": "outline",
-			"from": [11.5, 7.5, 11.5],
-			"to": [4.5, 0.5, 4.5],
+			"from": [11.5, 15.5, 11.5],
+			"to": [4.5, 8.5, 4.5],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 8, 0]},
 			"faces": {
 				"north": {"uv": [7, 11, 10, 14], "rotation": 180, "texture": "#0"},
 				"east": {"uv": [7, 11, 10, 14], "rotation": 180, "texture": "#0"},

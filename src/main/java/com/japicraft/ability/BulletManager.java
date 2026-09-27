@@ -1,17 +1,18 @@
-package com.japicraft.avatar;
+package com.japicraft.ability;
 
 import com.japicraft.Wayfare;
 import com.japicraft.camera.Coordinates;
-import com.japicraft.server.InstanceManager;
+import com.japicraft.packet.ParticlePacketManager;
+import com.japicraft.server.InstanceRegistry;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
-import net.minestom.server.instance.Instance;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.particle.Particle;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
@@ -20,8 +21,8 @@ import java.time.Duration;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class BulletManager {
-    public static final Tag<String> OWNER_NAME = Tag.String("ownerName");
-    private static final double HEIGHT = InstanceManager.MAX_HEIGHT + 1.5;
+    public static final Tag<String> SOURCE = Tag.String("source");
+    private static final double HEIGHT = InstanceRegistry.MAX_HEIGHT + 0.5;
     private static final double SPEED = 20.0;
     private static final double DRIFT = 1.5;
     private static final double SPREAD = 10.0;
@@ -42,7 +43,13 @@ public class BulletManager {
     }
 
     public static void scheduleSpawning(Player player) {
-        player.scheduler().scheduleTask(() -> BulletManager.spawnIncoming(player, 20.0, 15.0, 30.0), TaskSchedule.immediate(), TaskSchedule.tick(20));
+        player.scheduler().submitTask(() -> {
+            if (!player.isOnline()) {
+                return TaskSchedule.stop();
+            }
+            BulletManager.spawnIncoming(player, 20.0, 15.0, 30.0);
+            return TaskSchedule.tick(200);
+        });
     }
 
     public static void spawnIncoming(Player target, double radius, double speed, double maxSpread) {
@@ -56,23 +63,27 @@ public class BulletManager {
 
         Vec velocity = new Vec(Math.cos(flightAngle) * speed, 0, Math.sin(flightAngle) * speed);
 
-        BulletManager.spawn(target.getInstance(), "environment", target.getPosition().add(offsetX, 0, offsetZ), velocity);
+        BulletManager.spawn(target, "environment", offsetX, offsetZ, velocity);
     }
 
-    public static void spawn(Instance instance, String ownerName, Pos position, Vec velocity) {
+    public static void spawn(Player player, String source, double offsetX, double offsetZ, Vec velocity) {
         Entity bullet = new Entity(EntityType.ITEM_DISPLAY);
         // set entity properties
         bullet.setNoGravity(true);
         bullet.setHasPhysics(false);
-        bullet.setTag(BulletManager.OWNER_NAME, ownerName);
+        bullet.setTag(BulletManager.SOURCE, source);
         bullet.editEntityMeta(ItemDisplayMeta.class, meta -> {
             meta.setItemStack(ItemStack.of(Material.ECHO_SHARD).builder().itemModel(Wayfare.NAMESPACE + Wayfare.NAMESPACE_SEPARATOR + "bullet").build());
-            meta.setTransformationInterpolationDuration(10);
-            meta.setPosRotInterpolationDuration(10);
+            meta.setTransformationInterpolationDuration(2);
+            meta.setPosRotInterpolationDuration(4);
+            meta.setWidth(2.0F);
+            meta.setHeight(2.0F);
             meta.setScale(new Vec(0, 0, 0));
         });
+        bullet.setBoundingBox(2, 2, 2);
         // spawn entity
-        bullet.setInstance(instance, new Pos(position.x(), HEIGHT, position.z()));
+        Pos position = player.getPosition();
+        bullet.setInstance(player.getInstance(), new Pos(position.x() + offsetX, BulletManager.HEIGHT, position.z() + offsetZ));
         bullet.setVelocity(velocity);
 
         Scheduler scheduler = bullet.scheduler();
@@ -83,14 +94,18 @@ public class BulletManager {
                 meta.setScale(new Vec(1, 1, 1));
             });
         }, TaskSchedule.nextTick(), TaskSchedule.stop());
+
         scheduler.scheduleTask(() -> {
             // entity remove animation
             bullet.editEntityMeta(ItemDisplayMeta.class, meta -> {
                 meta.setTransformationInterpolationStartDelta(0);
                 meta.setScale(new Vec(0, 0, 0));
             });
-        }, TaskSchedule.seconds(3), TaskSchedule.stop());
+        }, TaskSchedule.tick(55), TaskSchedule.stop());
+
+        scheduler.scheduleTask(() -> ParticlePacketManager.show(player, Particle.INSTANT_EFFECT, bullet.getPosition(), ParticlePacketManager.NO_OFFSET, 0.0F, 1), TaskSchedule.tick(1), TaskSchedule.tick(1));
+
         // remove entity
-        bullet.scheduleRemove(Duration.ofSeconds(4));
+        bullet.scheduleRemove(Duration.ofSeconds(3));
     }
 }

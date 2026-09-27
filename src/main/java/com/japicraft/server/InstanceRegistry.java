@@ -2,38 +2,29 @@ package com.japicraft.server;
 
 import com.japicraft.Wayfare;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.registry.RegistryKey;
+import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.instance.LightingChunk;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.world.DimensionType;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
 
 public class InstanceRegistry {
-    public final RegistryKey<DimensionType> dimensionType;
-    private final Map<UUID, InstanceManager> instances = new HashMap<>();
+    public static final int MIN_HEIGHT = 0;
+    public static final int MAX_HEIGHT = 10;
+    private final InstanceContainer instanceContainer;
 
     public InstanceRegistry() {
-        dimensionType = MinecraftServer.getDimensionTypeRegistry().register(Wayfare.NAMESPACE + ":private_instance", DimensionType.builder()
-            .skybox(DimensionType.Skybox.NONE)
-            .build()
+        instanceContainer = MinecraftServer.getInstanceManager().createInstanceContainer(
+            MinecraftServer.getDimensionTypeRegistry().register(Wayfare.NAMESPACE + Wayfare.NAMESPACE_SEPARATOR + UUID.randomUUID(), DimensionType.builder()
+                .skybox(DimensionType.Skybox.NONE).build()
+            )
         );
+        instanceContainer.setChunkSupplier(LightingChunk::new);
+        instanceContainer.setGenerator(unit -> unit.modifier().fillHeight(InstanceRegistry.MIN_HEIGHT, InstanceRegistry.MAX_HEIGHT, Block.GRASS_BLOCK));
     }
 
-    public InstanceManager getOrCreate(UUID uuid) {
-        InstanceManager instance = instances.get(uuid);
-        if (instance == null) {
-            instance = new InstanceManager(dimensionType);
-            instances.put(uuid, instance);
-        }
-        return instance;
-    }
-
-    public void remove(UUID uuid) {
-        InstanceManager instance = instances.remove(uuid);
-        if (instance == null) {
-            return;
-        }
-        MinecraftServer.getInstanceManager().unregisterInstance(instance.getInstance());
+    public InstanceContainer get() {
+        return instanceContainer;
     }
 }

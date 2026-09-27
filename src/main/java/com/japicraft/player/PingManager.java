@@ -6,9 +6,9 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.timer.TaskSchedule;
 
 public class PingManager {
-    private final BossBar display = BossBar.bossBar(Component.empty(), 1.0F, BossBar.Color.WHITE, BossBar.Overlay.PROGRESS);
+    private final BossBar display = BossBar.bossBar(Component.empty(), 1.0F, BossBar.Color.PURPLE, BossBar.Overlay.PROGRESS);
 
-    public void schedule(Player player) {
+    public PingManager(Player player) {
         display.addViewer(player);
         player.scheduler().submitTask(() -> {
             if (!player.isOnline()) {
