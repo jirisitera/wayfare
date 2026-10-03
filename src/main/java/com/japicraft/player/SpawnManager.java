@@ -38,7 +38,7 @@ public class SpawnManager {
             // setup environment
             PointManager.schedule(player);
             BulletManager.scheduleSpawning(player);
-            CursorManager.update(player, 0.0F, 0.0F);
+            CursorManager.update(player, 0.0F, 0.0F, 0.0F, 0.0F);
             mountManager.addPassenger(avatarManager.getAvatar());
 
             // show tutorial

@@ -5,8 +5,8 @@ import com.japicraft.ability.CooldownManager;
 import com.japicraft.avatar.AvatarManager;
 import com.japicraft.server.TagRegistry;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
@@ -21,22 +21,26 @@ import net.minestom.server.tag.Tag;
 import java.time.Duration;
 
 public class CursorManager {
-    private static final Component SPRITE = Component.text("🖱").shadowColor(ShadowColor.none()).font(Wayfare.FONT);
-    private static final Title.Times TIMES = Title.Times.times(Duration.ZERO, Duration.ofSeconds(20), Duration.ofSeconds(1));
+    private static final Component SPRITE = Component.text("🖱").color(NamedTextColor.BLACK).font(Wayfare.FONT);
+    private static final Title.Times TIMES = Title.Times.times(Duration.ZERO, Duration.ofSeconds(30), Duration.ZERO);
     private static final Tag<Float> INPUT_YAW = Tag.Float("inputYaw").defaultValue(0.0F);
     private static final Tag<Float> INPUT_PITCH = Tag.Float("inputPitch").defaultValue(0.0F);
+    private static final Tag<Boolean> INPUT_LOCK = Tag.Boolean("inputLock").defaultValue(false);
 
-    private static TextColor getColor(float yaw, float pitch) {
-        Coordinates coordinates = Coordinates.fromRotation(yaw, pitch);
-        int x = (int) (coordinates.x() * 4095.0);
-        int y = (int) (coordinates.y() * 4095.0);
-        return TextColor.color(x / 16, y / 16, x % 16 * 16 + y % 16);
+    private static ShadowColor getShadowColor(float yaw, float pitch, float previousYaw, float previousPitch) {
+        Coordinates current = Coordinates.fromRotation(yaw, pitch);
+        Coordinates previous = Coordinates.fromRotation(previousYaw, previousPitch);
+        int currentX = (int) (current.x() * 255.0);
+        int currentY = (int) (current.y() * 255.0);
+        int previousX = (int) (previous.x() * 255.0);
+        int previousY = (int) (previous.y() * 255.0);
+        return ShadowColor.shadowColor((previousY << 24) | (currentX << 16) | (currentY << 8) | previousX);
     }
 
-    public static void update(Player player, float yaw, float pitch) {
+    public static void update(Player player, float yaw, float pitch, float previousYaw, float previousPitch) {
         player.setTag(CursorManager.INPUT_YAW, yaw);
         player.setTag(CursorManager.INPUT_PITCH, pitch);
-        player.showTitle(Title.title(Component.text(""), CursorManager.SPRITE.color(CursorManager.getColor(yaw, pitch)), CursorManager.TIMES));
+        player.showTitle(Title.title(Component.empty(), CursorManager.SPRITE.shadowColor(CursorManager.getShadowColor(yaw, pitch, previousYaw, previousPitch)), CursorManager.TIMES));
     }
 
     public void register(EventNode<PlayerEvent> eventNode) {
@@ -44,12 +48,23 @@ public class CursorManager {
             Player player = event.getPlayer();
             switch (event.getPacket()) {
                 case ClientPlayerRotationPacket rotation -> {
+                    float previousYaw = player.getTag(CursorManager.INPUT_YAW);
+                    float previousPitch = player.getTag(CursorManager.INPUT_PITCH);
                     float yaw = rotation.yaw();
                     float pitch = rotation.pitch();
-                    if (yaw == player.getTag(CursorManager.INPUT_YAW) && pitch == player.getTag(CursorManager.INPUT_PITCH)) {
+
+                    boolean locked = player.getTag(CursorManager.INPUT_LOCK);
+
+                    if (yaw == previousYaw && pitch == previousPitch) {
+                        if (!locked) {
+                            player.setTag(CursorManager.INPUT_LOCK, true);
+                            CursorManager.update(player, yaw, pitch, yaw, pitch);
+                        }
                         return;
+                    } else if (locked) {
+                        player.setTag(CursorManager.INPUT_LOCK, false);
                     }
-                    CursorManager.update(player, yaw, pitch);
+                    CursorManager.update(player, yaw, pitch, previousYaw, previousPitch);
                 }
                 case ClientAttackPacket _ -> {
                     if (CooldownManager.checkAndApply(player)) {

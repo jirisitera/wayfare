@@ -7,7 +7,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.DamageEventPacket;
-import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
 import net.minestom.server.timer.TaskSchedule;
 
@@ -23,7 +22,7 @@ public class AttackManager {
     private static final double HALF_ARC_DEGREES = ARC_DEGREES / 2.0;
     private static final double QUERY_RADIUS = RADIUS + 1.0;
 
-    public static void show(Player player, float yaw) {
+    public static void showParticles(Player player, float yaw) {
         AtomicInteger counter = new AtomicInteger();
         player.scheduler().submitTask(() -> {
             int iteration = counter.getAndAdd(2);
@@ -32,20 +31,22 @@ public class AttackManager {
                 return TaskSchedule.stop();
             }
             Pos position = player.getPosition();
-            AttackManager.send(player, position, yaw, iteration);
-            AttackManager.send(player, position, yaw, next);
+            AttackManager.sendParticles(player, position, yaw, iteration);
+            AttackManager.sendParticles(player, position, yaw, next);
             return TaskSchedule.nextTick();
         });
     }
 
-    public static void damage(Player attacker, float attackYaw) {
+    public static void swing(Player player, float yaw) {
+        showParticles(player, yaw);
+
         Set<Player> hitTargets = new HashSet<>();
         AtomicInteger ticks = new AtomicInteger();
-        attacker.scheduler().submitTask(() -> {
-            if (!attacker.isOnline() || ticks.getAndIncrement() >= 4) {
+        player.scheduler().submitTask(() -> {
+            if (!player.isOnline() || ticks.getAndIncrement() >= 4) {
                 return TaskSchedule.stop();
             }
-            AttackManager.checkTargets(attacker, attackYaw, hitTargets);
+            AttackManager.checkTargets(player, yaw, hitTargets);
             return TaskSchedule.nextTick();
         });
     }
@@ -80,19 +81,23 @@ public class AttackManager {
     }
 
     private static double getDifference(Pos attacker, Pos target, float attackYaw) {
-        double targetYaw = Math.toDegrees(Math.atan2(target.z() - attacker.z(), target.x() - attacker.x())) - 90.0;
-        // account for excessive rotation
-        double difference = (targetYaw - attackYaw) % 360.0;
+        double targetYaw = normalizeYaw(Math.toDegrees(Math.atan2(target.z() - attacker.z(), target.x() - attacker.x())) - 90.0);
+        double difference = targetYaw - normalizeYaw(attackYaw);
         if (difference > 180.0) difference -= 360.0;
         if (difference < -180.0) difference += 360.0;
         return Math.abs(difference);
     }
 
-    private static void send(Player player, Pos position, float yaw, int iteration) {
+    private static double normalizeYaw(double yaw) {
+        double normalized = yaw % 360.0;
+        return normalized < 0.0 ? normalized + 360.0 : normalized;
+    }
+
+    private static void sendParticles(Player player, Pos position, float yaw, int iteration) {
         double radians = Math.toRadians(yaw - HALF_ARC_DEGREES + (ARC_DEGREES * iteration / AttackManager.ITERATIONS));
         double x = position.x() - (Math.sin(radians) * AttackManager.RADIUS);
         double y = position.y() + AttackManager.HEIGHT;
         double z = position.z() + (Math.cos(radians) * AttackManager.RADIUS);
-        player.sendPacket(new ParticlePacket(Particle.CRIT, new Pos(x, y, z), ParticlePacketManager.NO_OFFSET, 0, 1));
+        ParticlePacketManager.show(player, Particle.CRIT, new Pos(x, y, z), ParticlePacketManager.NO_OFFSET, 0, 1);
     }
 }

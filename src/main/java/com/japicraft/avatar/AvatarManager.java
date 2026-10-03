@@ -36,8 +36,9 @@ public class AvatarManager {
     }
 
     public static float calculateAvatarYaw(float yaw, float pitch) {
-        double x = 0.5 - yaw;
-        double z = 0.5 - pitch;
+        Coordinates coordinates = Coordinates.fromRotation(yaw, pitch);
+        double x = 0.5 - coordinates.x();
+        double z = 0.5 - coordinates.y();
         if (x == 0.0 && z == 0.0) {
             return 0.0F;
         }
@@ -69,7 +70,6 @@ public class AvatarManager {
         float avatarYaw = calculateAvatarYaw(yaw, pitch);
         avatar.setView(avatarYaw, 0);
         avatar.swingMainHand();
-        AttackManager.show(player, avatarYaw);
-        AttackManager.damage(player, avatarYaw);
+        AttackManager.swing(player, avatarYaw);
     }
 }
